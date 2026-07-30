@@ -1,0 +1,189 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-sans), system-ui, -apple-system, sans-serif;
+  --font-display: var(--font-display), sans-serif;
+  --font-mono: var(--font-mono), ui-monospace, monospace;
+
+  /* ============================================================
+     NEXCART AI — PREMIUM ENTERPRISE DESIGN TOKENS
+     Token variable names (brass/pine) are kept stable on purpose —
+     every existing component across Marketplace/Admin/Billing/etc.
+     already references bg-brass-*, text-pine-*, etc. Re-mapping the
+     values here re-skins the entire app without touching that logic.
+     ============================================================ */
+
+  /* Primary — cobalt/electric blue. "brass-*" slot. */
+  --color-brass-50: #EAF4FF;
+  --color-brass-100: #CFE7FF;
+  --color-brass-200: #9FCEFF;
+  --color-brass-300: #63AFFF;
+  --color-brass-400: #3B93FF;
+  --color-brass-500: #2478F5;
+  --color-brass-600: #175FD1;
+  --color-brass-700: #124CAA;
+  --color-brass-800: #0F3D87;
+  --color-brass-900: #0C2F68;
+  --color-brass-950: #071B3D;
+
+  /* Accent — warm gold, premium highlight / success-adjacent. "pine-*" slot. */
+  --color-pine-50: #FFF8E8;
+  --color-pine-100: #FFEDC2;
+  --color-pine-200: #FFDA85;
+  --color-pine-300: #FFC547;
+  --color-pine-400: #FFB020;
+  --color-pine-500: #F0980A;
+  --color-pine-600: #C97D05;
+  --color-pine-700: #9C6104;
+  --color-pine-800: #714703;
+  --color-pine-900: #4D3002;
+  --color-pine-950: #2E1C01;
+
+  /* Semantic aliases, per the brief's explicit token list. */
+  --color-primary: var(--color-brass-500);
+  --color-secondary: #7C8CF8;
+  --color-accent: var(--color-pine-500);
+  --color-success: #22C55E;
+  --color-warning: #F59E0B;
+  --color-danger: #EF4444;
+  --color-bg: #0A0B0F;
+  --color-surface: #14161C;
+  --color-border-subtle: rgba(255, 255, 255, 0.08);
+  --color-text: #F5F6F8;
+  --color-text-muted: #8B93A7;
+
+  --animate-pulse-slow: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-glow: glow 8s ease-in-out infinite;
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+
+  @keyframes glow {
+    0%, 100% { opacity: 0.5; filter: drop-shadow(0 0 15px rgba(36, 120, 245, 0.25)); }
+    50% { opacity: 0.85; filter: drop-shadow(0 0 25px rgba(36, 120, 245, 0.4)); }
+  }
+
+  @keyframes ripple {
+    0% { transform: scale(0); opacity: 0.55; }
+    100% { transform: scale(1); opacity: 0; }
+  }
+}
+
+/* Custom CSS utilities for the NexCart AI premium enterprise identity */
+@layer utilities {
+  .text-gradient {
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-image: linear-gradient(100deg, #3B93FF 0%, #2478F5 55%, #7C8CF8 100%);
+  }
+
+  .text-gradient-dark {
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-image: linear-gradient(100deg, #63AFFF 0%, #3B93FF 55%, #7C8CF8 100%);
+  }
+
+  /* Soft dot ground, kept subtle behind hero/panel sections */
+  .registry-grid {
+    background-size: 32px 32px;
+    background-image: radial-gradient(rgba(36, 120, 245, 0.10) 1px, transparent 1px);
+  }
+
+  .registry-grid-dark {
+    background-size: 32px 32px;
+    background-image: radial-gradient(rgba(99, 175, 255, 0.07) 1px, transparent 1px);
+  }
+
+  /* Ambient gradient glows, used sparingly behind hero/auth panels */
+  .glow-orb-brass {
+    background: radial-gradient(circle, rgba(36, 120, 245, 0.20) 0%, transparent 70%);
+  }
+
+  .glow-orb-pine {
+    background: radial-gradient(circle, rgba(240, 152, 10, 0.14) 0%, transparent 70%);
+  }
+
+  /* Tabular, ledger-style numerals for prices, IDs, and specs */
+  .font-tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- Glassmorphism system ---------- */
+  .glass-panel {
+    background: rgba(255, 255, 255, 0.035);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .glass-panel-light {
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(20, 22, 30, 0.06);
+  }
+
+  .glass-elevated {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+
+  /* Professional elevation shadows — softer & bluer than default black shadows */
+  .shadow-premium-sm {
+    box-shadow: 0 2px 8px rgba(7, 10, 20, 0.25);
+  }
+  .shadow-premium {
+    box-shadow: 0 8px 24px rgba(7, 10, 20, 0.35), 0 2px 8px rgba(7, 10, 20, 0.2);
+  }
+  .shadow-premium-lg {
+    box-shadow: 0 20px 48px rgba(7, 10, 20, 0.45), 0 8px 20px rgba(7, 10, 20, 0.25);
+  }
+  .shadow-glow-primary {
+    box-shadow: 0 8px 32px rgba(36, 120, 245, 0.25);
+  }
+
+  /* Smaller nested panels (stat tiles inside a glass-elevated card) */
+  .glass-inset {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 0.75rem;
+  }
+}
+
+/* Base level overrides */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}

@@ -1,0 +1,190 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function currentUserRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    function isAdmin() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        currentUserRole() == 'admin';
+    }
+
+    // ---------- users ----------
+    // A user can read/update their own profile. Admins can read/update anyone.
+    // Nobody can change their own `role` or `status` — only an admin can.
+    match /users/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow create: if isOwner(uid);
+      allow update: if isAdmin() ||
+        (isOwner(uid) &&
+          request.resource.data.role == resource.data.role &&
+          request.resource.data.status == resource.data.status);
+      allow delete: if isAdmin();
+    }
+
+    // ---------- workspaces ----------
+    function isActiveWorkspaceMember(workspaceId) {
+      return exists(/databases/$(database)/documents/workspaceMembers/$(workspaceId + '_' + request.auth.uid)) &&
+        get(/databases/$(database)/documents/workspaceMembers/$(workspaceId + '_' + request.auth.uid)).data.status == 'active';
+    }
+
+    match /workspaces/{workspaceId} {
+      allow read: if isSignedIn() && (resource.data.ownerId == request.auth.uid || isActiveWorkspaceMember(workspaceId) || isAdmin());
+      allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
+      allow update, delete: if isSignedIn() && (resource.data.ownerId == request.auth.uid || isAdmin());
+    }
+
+    // ---------- workspaceMembers ----------
+    // Members can read their own workspace's roster. Only the workspace
+    // owner or a platform admin can write (invite/remove/change role) — a
+    // coarser backstop than the app's full Owner/Admin/Manager matrix, which
+    // is enforced client-side by services/permissionService.ts.
+    match /workspaceMembers/{memberId} {
+      allow read: if isSignedIn() && (
+        resource.data.uid == request.auth.uid ||
+        resource.data.email == request.auth.token.email ||
+        get(/databases/$(database)/documents/workspaces/$(resource.data.workspaceId)).data.ownerId == request.auth.uid ||
+        isAdmin()
+      );
+      allow write: if isSignedIn() && (
+        get(/databases/$(database)/documents/workspaces/$(request.resource.data.workspaceId)).data.ownerId == request.auth.uid ||
+        (resource != null && resource.data.uid == request.auth.uid) || // accept/reject own invitation
+        isAdmin()
+      );
+    }
+
+    // ---------- subscriptions ----------
+    match /subscriptions/{workspaceId} {
+      allow read: if isSignedIn() && (resource.data.workspaceId == request.auth.uid || isActiveWorkspaceMember(workspaceId) || isAdmin());
+      allow write: if isSignedIn() && (
+        get(/databases/$(database)/documents/workspaces/$(workspaceId)).data.ownerId == request.auth.uid || isAdmin()
+      );
+    }
+
+    // ---------- paymentHistory / invoices ----------
+    // Written by the (future) server-side webhook handler in production;
+    // client writes are allowed for now since no live payment processor is
+    // wired up yet, gated to the workspace owner/admin.
+    match /paymentHistory/{docId} {
+      allow read: if isSignedIn() && (
+        get(/databases/$(database)/documents/workspaces/$(resource.data.workspaceId)).data.ownerId == request.auth.uid || isAdmin()
+      );
+      allow write: if isSignedIn() && (
+        get(/databases/$(database)/documents/workspaces/$(request.resource.data.workspaceId)).data.ownerId == request.auth.uid || isAdmin()
+      );
+    }
+    match /invoices/{docId} {
+      allow read: if isSignedIn() && (
+        get(/databases/$(database)/documents/workspaces/$(resource.data.workspaceId)).data.ownerId == request.auth.uid || isAdmin()
+      );
+      allow write: if isSignedIn() && (
+        get(/databases/$(database)/documents/workspaces/$(request.resource.data.workspaceId)).data.ownerId == request.auth.uid || isAdmin()
+      );
+    }
+
+    // ---------- activityLogs ----------
+    match /activityLogs/{docId} {
+      allow read: if isSignedIn() && (resource.data.workspaceId == request.auth.uid || isActiveWorkspaceMember(resource.data.workspaceId) || isAdmin());
+      allow create: if isSignedIn();
+      allow update, delete: if false;
+    }
+
+    // ---------- auditLogs ----------
+    // Admin-only, per spec. Nobody can edit or delete an audit trail.
+    match /auditLogs/{docId} {
+      allow read: if isAdmin();
+      allow create: if isSignedIn();
+      allow update, delete: if false;
+    }
+
+    // ---------- agents (marketplace catalog) ----------
+    // Readable by any signed-in user; only admins can publish/edit/remove.
+    match /agents/{agentId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // ---------- installedAgents ----------
+    match /installedAgents/{docId} {
+      allow read, write: if isSignedIn() &&
+        (resource == null || resource.data.userId == request.auth.uid || isAdmin());
+    }
+
+    // ---------- favorites ----------
+    match /favorites/{docId} {
+      allow read, write: if isSignedIn() &&
+        (resource == null || resource.data.userId == request.auth.uid);
+    }
+
+    // ---------- connections ----------
+    // Written exclusively by the Admin SDK from app/api/connections/** route
+    // handlers (which bypass these rules entirely). Clients can only READ
+    // their own connection's safe fields — never write directly, and never
+    // read the encrypted-token subcollection below.
+    match /connections/{docId} {
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow write: if false;
+
+      // Encrypted access/refresh tokens. No client, including admins, may
+      // ever read or write this — only the Admin SDK (server) can.
+      match /secret/{secretId} {
+        allow read, write: if false;
+      }
+    }
+
+    // ---------- oauthStates ----------
+    // Short-lived CSRF state for the OAuth handshake. Server-only.
+    match /oauthStates/{stateId} {
+      allow read, write: if false;
+    }
+
+    // ---------- integrationLogs ----------
+    // Written exclusively by the Integration Engine's logging module via the
+    // Admin SDK. Contains no credentials by design — safe for the owning
+    // workspace or an admin to read for debugging.
+    match /integrationLogs/{logId} {
+      allow read: if isSignedIn() && (resource.data.workspaceId == request.auth.uid || isAdmin());
+      allow write: if false;
+    }
+
+    // ---------- integrationQueue ----------
+    // Written exclusively by the Integration Engine's queue module via the
+    // Admin SDK.
+    match /integrationQueue/{itemId} {
+      allow read: if isSignedIn() && (resource.data.workspaceId == request.auth.uid || isAdmin());
+      allow write: if false;
+    }
+
+    // ---------- notifications ----------
+    match /notifications/{docId} {
+      allow read, update, delete: if isSignedIn() &&
+        (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isAdmin();
+    }
+
+    // ---------- pricingPlans ----------
+    // Public read (shown on the pricing page); only admins can edit.
+    match /pricingPlans/{planId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ---------- settings ----------
+    match /settings/{docId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+  }
+}

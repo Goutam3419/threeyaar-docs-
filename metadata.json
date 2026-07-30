@@ -1,0 +1,6 @@
+{
+  "name": "AI Agent Marketplace",
+  "description": "A premium, production-quality frontend foundation for an AI Agent Marketplace, featuring responsive dashboard layouts, full authentication flows, and polished reusable UI components.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,32 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Profile photos: a user can only read/write files inside their own
+    // users/{uid}/ folder. Anyone signed in can view profile photos
+    // (needed to render avatars across a shared workspace).
+    match /users/{uid}/{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+        && request.auth.uid == uid
+        && request.resource.size < 5 * 1024 * 1024 // 5MB max
+        && request.resource.contentType.matches('image/.*');
+    }
+
+    // Agent marketplace assets (icons, cover images, screenshots): publicly
+    // readable so they render on the marketplace; only admins can upload.
+    match /agents/{agentId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null
+        && firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin'
+        && request.resource.size < 10 * 1024 * 1024 // 10MB max
+        && request.resource.contentType.matches('image/.*');
+    }
+
+    // Deny everything else by default.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

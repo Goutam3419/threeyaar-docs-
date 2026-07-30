@@ -1,0 +1,65 @@
+{
+  "indexes": [
+    { "collectionGroup": "agents", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "status", "order": "ASCENDING" },
+      { "fieldPath": "downloads", "order": "DESCENDING" }
+    ]},
+    { "collectionGroup": "agents", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "status", "order": "ASCENDING" },
+      { "fieldPath": "rating", "order": "DESCENDING" }
+    ]},
+    { "collectionGroup": "agents", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "status", "order": "ASCENDING" },
+      { "fieldPath": "createdAt", "order": "DESCENDING" }
+    ]},
+    { "collectionGroup": "agents", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "status", "order": "ASCENDING" },
+      { "fieldPath": "featured", "order": "DESCENDING" }
+    ]},
+    { "collectionGroup": "agents", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "status", "order": "ASCENDING" },
+      { "fieldPath": "category", "order": "ASCENDING" },
+      { "fieldPath": "downloads", "order": "DESCENDING" }
+    ]},
+    { "collectionGroup": "agents", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "status", "order": "ASCENDING" },
+      { "fieldPath": "category", "order": "ASCENDING" },
+      { "fieldPath": "rating", "order": "DESCENDING" }
+    ]},
+    { "collectionGroup": "agents", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "status", "order": "ASCENDING" },
+      { "fieldPath": "category", "order": "ASCENDING" },
+      { "fieldPath": "createdAt", "order": "DESCENDING" }
+    ]},
+    { "collectionGroup": "agents", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "status", "order": "ASCENDING" },
+      { "fieldPath": "category", "order": "ASCENDING" },
+      { "fieldPath": "featured", "order": "DESCENDING" }
+    ]},
+    { "collectionGroup": "agents", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "status", "order": "ASCENDING" },
+      { "fieldPath": "pricingType", "order": "ASCENDING" },
+      { "fieldPath": "downloads", "order": "DESCENDING" }
+    ]},
+    { "collectionGroup": "agents", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "status", "order": "ASCENDING" },
+      { "fieldPath": "pricingType", "order": "ASCENDING" },
+      { "fieldPath": "rating", "order": "DESCENDING" }
+    ]},
+    { "collectionGroup": "agents", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "status", "order": "ASCENDING" },
+      { "fieldPath": "pricingType", "order": "ASCENDING" },
+      { "fieldPath": "createdAt", "order": "DESCENDING" }
+    ]},
+    { "collectionGroup": "agents", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "status", "order": "ASCENDING" },
+      { "fieldPath": "pricingType", "order": "ASCENDING" },
+      { "fieldPath": "featured", "order": "DESCENDING" }
+    ]},
+    { "collectionGroup": "agents", "queryScope": "COLLECTION", "fields": [
+      { "fieldPath": "status", "order": "ASCENDING" },
+      { "fieldPath": "category", "order": "ASCENDING" }
+    ]}
+  ],
+  "fieldOverrides": []
+}
